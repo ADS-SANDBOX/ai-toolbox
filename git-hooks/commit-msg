@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# File: .git/hooks/commit-msg
+# Description: Hook to validate the commit message format
+
+# Array of allowed categories
+# shellcheck disable=SC2054
+categories=(
+    "git"
+    "docker"
+    "laravel"
+    "resources"
+    "bundle"
+    "linter"
+    "utilities"
+    "refactor"
+    "feature"
+    "fix"
+    "wip"
+)
+
+# Build the regex pattern for the categories
+category_pattern=$(IFS="|"; echo "${categories[*]}")
+
+# Complete pattern for the commit message
+commit_pattern="^($category_pattern): .+\.$"
+
+# Get the commit message
+commit_msg=$(cat "$1")
+
+# Colors for formatting
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if the message matches the pattern
+if ! [[ $commit_msg =~ $commit_pattern ]]; then
+    echo -e "${RED}Error: The commit message does not follow the required format.${NC}"
+    echo -e "${YELLOW}Format: ${GREEN}<category>${NC}: <description>."
+    echo -e "${YELLOW}Allowed categories:${NC}"
+    for category in "${categories[@]}"; do
+        echo -e "${GREEN}  - ${category}${NC}"
+    done
+    echo -e "${YELLOW}Make sure the message ends with a point.${NC}"
+    exit 1
+fi

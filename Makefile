@@ -1,0 +1,91 @@
+.PHONY: build up down logs clean init-laravel pint stan rector linter test composer yarn-install yarn-build artisan-migrate storage-link
+
+DOCKER_COMPOSE_FILE := .docker/docker-compose.yml
+NGINX_TEMPLATE := .docker/project/nginx/nginx.template
+NGINX_CONF := .docker/project/nginx/nginx.conf
+ENV_FILE := .docker/.env
+ENV_EXAMPLE := .docker/.env.example
+CODE_DIR := ./code
+
+-include $(ENV_FILE)
+export
+
+DC := docker-compose -f $(DOCKER_COMPOSE_FILE)
+EXEC := $(DC) exec php sh -c
+
+build:
+	envsubst '$$COMPOSE_PROJECT_NAME' < $(NGINX_TEMPLATE) > $(NGINX_CONF)
+	$(DC) build
+
+build-no-cache:
+	$(DC) build --no-cache
+
+up:
+	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_EXAMPLE)" ]; then \
+		echo "Copying $(ENV_EXAMPLE) to $(ENV_FILE)..."; \
+		cp "$(ENV_EXAMPLE)" "$(ENV_FILE)"; \
+	fi
+	$(DC) up -d
+
+down:
+	$(DC) down
+
+logs:
+	$(DC) logs -f
+
+clean:
+	$(DC) down --volumes --remove-orphans
+	docker network ls --filter="name=$(notdir $(basename $(DOCKER_COMPOSE_FILE)))_" --format '{{.ID}}' | xargs -r docker network rm
+	docker images -q $(notdir $(dirname $(DOCKER_COMPOSE_FILE)))_* | xargs -r docker rmi -f
+
+init-laravel:
+	@if [ ! -d "$(CODE_DIR)" ]; then \
+		$(EXEC) "composer create-project laravel/laravel code && \
+		cd $(CODE_DIR) && \
+		composer require laravel/pint phpstan/phpstan rector/rector --dev && \
+		php artisan storage:link" && \
+		echo "Copying resources from .resources/Laravel to code..." && \
+		cp -r .resources/Laravel/* $(CODE_DIR)/ && \
+		$(MAKE) linter; \
+	else \
+		echo "The 'code' folder already exists. No need to create a new project."; \
+	fi
+
+define run_in_code
+@if [ -d "$(CODE_DIR)" ]; then \
+	$(EXEC) "cd $(CODE_DIR) && $(1)"; \
+else \
+	echo "The 'code' folder does not exist."; \
+fi
+endef
+
+pint:
+	$(call run_in_code,./vendor/bin/pint -v)
+
+rector:
+	$(call run_in_code,./vendor/bin/rector process --memory-limit=2G)
+
+linter: rector pint
+
+composer:
+	$(call run_in_code,composer install)
+
+
+artisan-migrate:
+	$(call run_in_code,php artisan migrate)
+
+artisan-migrate-rollback:
+	$(call run_in_code,php artisan migrate:rollback)
+
+
+storage-link:
+	$(call run_in_code,php artisan storage:link)
+
+git-hooks:
+	git config core.hooksPath git-hooks
+
+autoload:
+	$(call run_in_code,composer dump-autoload)
+	$(call run_in_code,php artisan cache:clear)
+	$(call run_in_code,php artisan view:clear)
+	$(call run_in_code,php artisan config:clear)

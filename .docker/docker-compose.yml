@@ -1,0 +1,64 @@
+networks:
+    app-network:
+
+x-environment: &environment
+    COMPOSE_PROJECT_NAME: "${COMPOSE_PROJECT_NAME}"
+
+services:
+    nginx:
+        image: nginx:1.21.6-alpine
+        container_name: "${COMPOSE_PROJECT_NAME}-nginx"
+        restart: unless-stopped
+        ports:
+            - "8${PORT_VAR}0:80"
+        volumes:
+            - ../:/var/www
+            - ./project/nginx:/etc/nginx/conf.d
+        networks:
+            app-network:
+        environment:
+            <<: *environment
+
+    php:
+        build:
+            context: ./project/php
+            dockerfile: Dockerfile
+        container_name: "${COMPOSE_PROJECT_NAME}-php"
+        volumes:
+            - ../:/var/www
+            - ./project/php/php.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            app-network:
+        environment:
+            <<: *environment
+
+    golang:
+        build:
+            context: ./project/golang
+            dockerfile: Dockerfile
+        container_name: "${COMPOSE_PROJECT_NAME}-golang"
+        volumes:
+            - ../:/var/www
+            - ./project/golang/:/var/golang
+        networks:
+            app-network:
+        environment:
+            <<: *environment
+    database:
+        image: mariadb:10.6
+        container_name: "${COMPOSE_PROJECT_NAME}-db"
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: "${COMPOSE_PROJECT_NAME}"
+            MYSQL_USER: docker
+            MYSQL_PASSWORD: secret
+            <<: *environment
+        ports:
+            - "3${PORT_VAR}06:3306"
+        volumes:
+            - ./project/db:/var/lib/mysql
+        networks:
+            app-network:
+volumes:
+    app-data:

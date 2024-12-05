@@ -1,0 +1,42 @@
+server {
+    # Listens on port 80 for incoming requests.
+    listen 80;
+
+    # Sets the default index files to 'index.php' and 'index.html'.
+    index index.php index.html;
+
+    # Sets the path for the error log file.
+    error_log  /var/log/nginx/error.log;
+
+    # Sets the path for the access log file.
+    access_log /var/log/nginx/access.log;
+
+    # Sets the root directory for the web server to '/var/www/code/public'.
+    root /var/www/code/public;
+
+    # Handles requests for PHP files.
+    location ~ \.php$ {
+        # Tries to serve the requested file, or returns a 404 error.
+        try_files $uri =404;
+        # Splits the requested URL to pass it to the FastCGI backend.
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        # Passes the request to the PHP-FPM container running on port 9000.
+        fastcgi_pass ${COMPOSE_PROJECT_NAME}-php:9000;
+        # Sets the default index file for PHP files to 'index.php'.
+        fastcgi_index index.php;
+        # Includes the default FastCGI parameters.
+        include fastcgi_params;
+        # Sets the script filename to execute.
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        # Passes the PATH_INFO parameter to the backend.
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+    }
+
+    # Handles all other requests.
+    location / {
+        # Tries to serve the requested file or directory, or passes the request to 'index.php' with the query string.
+        try_files $uri $uri/ /index.php?$query_string;
+        # Enables serving precompressed '.gz' files if available.
+        gzip_static on;
+    }
+}
