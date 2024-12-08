@@ -20,8 +20,8 @@ readonly class LoadRoutesFromBundles
             callback: function (
                 $routeFile
             ): void {
-                // Add the route file to the 'web' middleware group
-                Route::middleware('web')->group(callback: $routeFile->getPathname());
+                // Add the route file to the 'api' middleware group
+                Route::middleware('api')->prefix('api')->group(callback: $routeFile->getPathname());
             }
         );
     }

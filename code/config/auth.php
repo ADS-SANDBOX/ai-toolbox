@@ -112,4 +112,7 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'jwt' => [
+        'token_expiration_minutes' => env('JWT_TOKEN_EXPIRATION_MINUTES', 1440),
+    ],
 ];
