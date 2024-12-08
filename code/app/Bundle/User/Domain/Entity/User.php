@@ -3,11 +3,14 @@
 namespace App\Bundle\User\Domain\Entity;
 
 use App\Bundle\User\Domain\ValueObject\Email;
+use App\Bundle\User\Domain\ValueObject\HashedApiKey;
 use App\Bundle\User\Domain\ValueObject\HashedPassword;
 
 final class User
 {
     private ?string $token = null;
+
+    private ?HashedApiKey $hashedApiKey = null;
 
     public function __construct(
         private readonly string $id,
@@ -44,5 +47,15 @@ final class User
     public function setToken(string $token): void
     {
         $this->token = $token;
+    }
+
+    public function openaiApiKey(): ?HashedApiKey
+    {
+        return $this->hashedApiKey;
+    }
+
+    public function setOpenaiApiKey(?HashedApiKey $hashedApiKey): void
+    {
+        $this->hashedApiKey = $hashedApiKey;
     }
 }

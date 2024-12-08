@@ -7,6 +7,7 @@ use App\Bundle\User\Domain\Exception\InvalidEmailException;
 use App\Bundle\User\Domain\Exception\InvalidPasswordException;
 use App\Bundle\User\Domain\Repository\UserRepository;
 use App\Bundle\User\Domain\ValueObject\Email;
+use App\Bundle\User\Domain\ValueObject\HashedApiKey;
 use App\Bundle\User\Domain\ValueObject\HashedPassword;
 use App\Bundle\User\Infrastructure\Persistence\Eloquent\UserModel;
 
@@ -31,6 +32,7 @@ final class EloquentUserRepository implements UserRepository
                 'email' => $user->email()->value(),
                 'password' => $user->password()->value(),
                 'token' => $user->token(),
+                'openai_api_key' => $user->openaiApiKey()?->value(),
             ]);
     }
 
@@ -63,6 +65,15 @@ final class EloquentUserRepository implements UserRepository
 
         if ($userModel->token) {
             $user->setToken(token: $userModel->token);
+        }
+
+        if ($userModel->openai_api_key) {
+            $user->setOpenaiApiKey(
+                hashedApiKey: new HashedApiKey(
+                    apiKey: $userModel->openai_api_key,
+                    isHashed: true
+                )
+            );
         }
 
         return $user;

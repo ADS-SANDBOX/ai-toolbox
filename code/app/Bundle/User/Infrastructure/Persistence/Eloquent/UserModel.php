@@ -3,16 +3,16 @@
 namespace App\Bundle\User\Infrastructure\Persistence\Eloquent;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-final class UserModel extends Model implements JWTSubject
+final class UserModel extends Authenticatable implements JWTSubject
 {
     use HasUuids;
 
     protected $table = 'users';
 
-    protected $fillable = ['id', 'name', 'email', 'password', 'token'];
+    protected $fillable = ['id', 'name', 'email', 'password', 'token', 'openai_api_key'];
 
     public function getJWTIdentifier()
     {
