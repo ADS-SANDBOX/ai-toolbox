@@ -54,7 +54,10 @@ final class EloquentUserRepository implements UserRepository
         $user = new User(
             id: $userModel->id,
             email: new Email(email: $userModel->email),
-            hashedPassword: new HashedPassword(plainPassword: $userModel->password),
+            hashedPassword: new HashedPassword(
+                plainPassword: $userModel->password,
+                isHashed: true
+            ),
             name: $userModel->name
         );
 

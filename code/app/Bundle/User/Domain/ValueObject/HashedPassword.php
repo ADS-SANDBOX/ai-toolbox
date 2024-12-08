@@ -12,10 +12,16 @@ final readonly class HashedPassword
     /**
      * @throws InvalidPasswordException
      */
-    public function __construct(string $plainPassword)
-    {
-        $this->validate(password: $plainPassword);
-        $this->value = Hash::make($plainPassword);
+    public function __construct(
+        string $plainPassword,
+        bool $isHashed = false
+    ) {
+        if ($isHashed) {
+            $this->value = $plainPassword;
+        } else {
+            $this->validate(password: $plainPassword);
+            $this->value = Hash::make($plainPassword);
+        }
     }
 
     /**
