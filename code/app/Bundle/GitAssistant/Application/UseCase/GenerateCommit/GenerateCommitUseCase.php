@@ -32,12 +32,12 @@ final readonly class GenerateCommitUseCase
             throw new UserOpenaiApiKeyMissingException(id: $generateCommitDTO->userId());
         }
 
-        if ($generateCommitDTO->isEmptyDiff()) {
+        if ($generateCommitDTO->gitDiff()->isEmpty()) {
             throw new EmptyGitDiffException;
         }
 
         return $this->commitGeneratorService->generateMessage(
-            gitDiff: $generateCommitDTO->gitDiff(),
+            gitDiff: $generateCommitDTO->gitDiff()->value(),
             apiKey: $user->openaiApiKey()->decrypt()
         );
     }

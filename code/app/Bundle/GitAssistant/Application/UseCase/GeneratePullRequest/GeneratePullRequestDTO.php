@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Bundle\GitAssistant\Application\UseCase\GenerateCommit;
+namespace App\Bundle\GitAssistant\Application\UseCase\GeneratePullRequest;
 
 use App\Bundle\GitAssistant\Domain\ValueObject\GitDiff;
 
-final readonly class GenerateCommitDTO
+final readonly class GeneratePullRequestDTO
 {
     public function __construct(
         private GitDiff $gitDiff,

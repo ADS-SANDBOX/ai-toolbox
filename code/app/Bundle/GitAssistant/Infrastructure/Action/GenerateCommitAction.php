@@ -4,6 +4,7 @@ namespace App\Bundle\GitAssistant\Infrastructure\Action;
 
 use App\Bundle\GitAssistant\Application\UseCase\GenerateCommit\GenerateCommitDTO;
 use App\Bundle\GitAssistant\Application\UseCase\GenerateCommit\GenerateCommitUseCase;
+use App\Bundle\GitAssistant\Domain\ValueObject\GitDiff;
 use App\Bundle\GitAssistant\Infrastructure\Http\Request\GenerateCommitRequest;
 use App\Bundle\GitAssistant\Infrastructure\Http\Response\CommitGeneratedResponse;
 use Exception;
@@ -20,7 +21,7 @@ final readonly class GenerateCommitAction
         try {
             $result = $this->generateCommitUseCase->execute(
                 generateCommitDTO: new GenerateCommitDTO(
-                    gitDiff: $generateCommitRequest->get(key: 'git_diff'),
+                    gitDiff: new GitDiff(value: $generateCommitRequest->get(key: 'git_diff')),
                     userId: $generateCommitRequest->user()->id
                 )
             );

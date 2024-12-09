@@ -5,11 +5,11 @@ namespace App\Bundle\GitAssistant\Infrastructure\Service;
 use Illuminate\Support\Facades\Redis;
 use JsonException;
 
-final readonly class CommitResponseCache
+final readonly class PullRequestResponseCache
 {
     private const TTL = 86400; // 24 hours in seconds
 
-    private const PREFIX = 'commit_generator:';
+    private const PREFIX = 'pull_request_generator:';
 
     /**
      * Get cached response for a git diff
@@ -27,7 +27,7 @@ final readonly class CommitResponseCache
             $data = json_decode($cached, true, 512, JSON_THROW_ON_ERROR);
 
             return [
-                'message' => $data['message'],
+                'description' => $data['description'],
                 'cached' => true,
                 'expires_at' => $data['expires_at'],
             ];
@@ -50,12 +50,12 @@ final readonly class CommitResponseCache
      *
      * @throws JsonException
      */
-    public function put(string $gitDiff, string $message): array
+    public function put(string $gitDiff, string $description): array
     {
         $expiresAt = now()->addSeconds(self::TTL)->toIso8601String();
 
         $data = [
-            'message' => $message,
+            'description' => $description,
             'expires_at' => $expiresAt,
         ];
 
@@ -66,7 +66,7 @@ final readonly class CommitResponseCache
         );
 
         return [
-            'message' => $message,
+            'description' => $description,
             'cached' => false,
             'expires_at' => $expiresAt,
         ];
