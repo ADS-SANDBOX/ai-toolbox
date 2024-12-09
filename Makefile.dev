@@ -1,4 +1,4 @@
-.PHONY: build build-no-cache up down composer artisan-migrate artisan-migrate-rollback scribe autoload
+.PHONY: build up down logs clean init-laravel pint stan rector linter test composer yarn-install yarn-build artisan-migrate storage-link
 
 DOCKER_COMPOSE_FILE := .docker/docker-compose.yml
 NGINX_TEMPLATE := .docker/project/nginx/nginx.template
@@ -14,10 +14,6 @@ DC := docker-compose -f $(DOCKER_COMPOSE_FILE)
 EXEC := $(DC) exec php sh -c
 
 build:
-	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_EXAMPLE)" ]; then \
-		echo "Copying $(ENV_EXAMPLE) to $(ENV_FILE)..."; \
-		cp "$(ENV_EXAMPLE)" "$(ENV_FILE)"; \
-	fi
 	envsubst '$$COMPOSE_PROJECT_NAME' < $(NGINX_TEMPLATE) > $(NGINX_CONF)
 	$(DC) build
 
@@ -34,6 +30,26 @@ up:
 down:
 	$(DC) down
 
+logs:
+	$(DC) logs -f
+
+clean:
+	$(DC) down --volumes --remove-orphans
+	docker network ls --filter="name=$(notdir $(basename $(DOCKER_COMPOSE_FILE)))_" --format '{{.ID}}' | xargs -r docker network rm
+	docker images -q $(notdir $(dirname $(DOCKER_COMPOSE_FILE)))_* | xargs -r docker rmi -f
+
+init-laravel:
+	@if [ ! -d "$(CODE_DIR)" ]; then \
+		$(EXEC) "composer create-project laravel/laravel code && \
+		cd $(CODE_DIR) && \
+		composer require laravel/pint phpstan/phpstan rector/rector --dev && \
+		php artisan storage:link" && \
+		echo "Copying resources from .resources/Laravel to code..." && \
+		cp -r .resources/Laravel/* $(CODE_DIR)/ && \
+		$(MAKE) linter; \
+	else \
+		echo "The 'code' folder already exists. No need to create a new project."; \
+	fi
 
 define run_in_code
 @if [ -d "$(CODE_DIR)" ]; then \
@@ -43,21 +59,17 @@ else \
 fi
 endef
 
-init:
-	@if [ ! -f "$(CODE_DIR)/.env" ] && [ -f "$(CODE_DIR)/.env.example" ]; then \
-		cp "$(CODE_DIR)/.env.example" "$(CODE_DIR)/.env"; \
-		echo "Laravel .env file created"; \
-	fi
-	$(MAKE) composer
-	$(call run_in_code,php artisan key:generate)
-	$(call run_in_code,php artisan jwt:secret --force)
-	$(MAKE) artisan-migrate
-	$(MAKE) autoload
-	$(MAKE) artisan-scribe
-	@echo "Laravel and JWT keys generated successfully"
+pint:
+	$(call run_in_code,./vendor/bin/pint -v)
+
+rector:
+	$(call run_in_code,./vendor/bin/rector process --memory-limit=2G)
+
+linter: rector pint
 
 composer:
 	$(call run_in_code,composer install)
+
 
 artisan-migrate:
 	$(call run_in_code,php artisan migrate)
@@ -65,8 +77,12 @@ artisan-migrate:
 artisan-migrate-rollback:
 	$(call run_in_code,php artisan migrate:rollback)
 
-artisan-scribe:
-	$(call run_in_code,php artisan scribe:generate)
+
+storage-link:
+	$(call run_in_code,php artisan storage:link)
+
+git-hooks:
+	git config core.hooksPath git-hooks
 
 autoload:
 	$(call run_in_code,composer dump-autoload)
