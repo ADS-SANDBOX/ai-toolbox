@@ -12,6 +12,11 @@ final readonly class UpdateApiKeyController
         private UpdateApiKeyAction $updateApiKeyAction
     ) {}
 
+    /**
+     * Update Api Key
+     *
+     * @group Profile
+     */
     public function __invoke(UpdateApiKeyRequest $updateApiKeyRequest): JsonResponse
     {
         return ($this->updateApiKeyAction)(updateApiKeyRequest: $updateApiKeyRequest);

@@ -12,6 +12,11 @@ final readonly class GenerateCommitController
         private GenerateCommitAction $generateCommitAction
     ) {}
 
+    /**
+     * Generate Commit
+     *
+     * @group GitAssistant
+     */
     public function __invoke(GenerateCommitRequest $generateCommitRequest): JsonResponse
     {
         return ($this->generateCommitAction)(generateCommitRequest: $generateCommitRequest);

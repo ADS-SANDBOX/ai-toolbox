@@ -12,6 +12,13 @@ final readonly class LoginController
         private LoginAction $loginAction
     ) {}
 
+    /**
+     * Login User
+     *
+     * @group Auth
+     *
+     * @unauthenticated
+     */
     public function __invoke(LoginRequest $loginRequest): JsonResponse
     {
         return ($this->loginAction)(loginRequest: $loginRequest);

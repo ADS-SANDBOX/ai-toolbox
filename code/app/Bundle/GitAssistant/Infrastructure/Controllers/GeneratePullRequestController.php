@@ -12,6 +12,11 @@ final readonly class GeneratePullRequestController
         private GeneratePullRequestAction $generatePullRequestAction
     ) {}
 
+    /**
+     * Generate Pull Request
+     *
+     * @group GitAssistant
+     */
     public function __invoke(GeneratePullRequestRequest $generatePullRequestRequest): JsonResponse
     {
         return ($this->generatePullRequestAction)(generatePullRequestRequest: $generatePullRequestRequest);

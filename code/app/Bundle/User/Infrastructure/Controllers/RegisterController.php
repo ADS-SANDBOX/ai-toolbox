@@ -12,6 +12,13 @@ final readonly class RegisterController
         private RegisterUserAction $registerUserAction
     ) {}
 
+    /**
+     * Register User
+     *
+     * @group Auth
+     *
+     * @unauthenticated
+     */
     public function __invoke(RegisterUserRequest $registerUserRequest): JsonResponse
     {
         return ($this->registerUserAction)(registerUserRequest: $registerUserRequest);
