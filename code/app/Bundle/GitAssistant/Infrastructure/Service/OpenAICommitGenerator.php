@@ -31,14 +31,23 @@ final readonly class OpenAICommitGenerator implements CommitGeneratorService
            - Impact or motivation if relevant.
         EOF;
 
+    public function __construct(
+        private CommitResponseCache $commitResponseCache
+    ) {}
+
     /**
      * @throws InvalidApiKeyException
      * @throws ServiceUnavailableException
      */
-    public function generateMessage(string $gitDiff, string $apiKey): string
+    public function generateMessage(string $gitDiff, string $apiKey): array
     {
-        try {
+        // Check cache first
+        $cached = $this->commitResponseCache->get(gitDiff: $gitDiff);
+        if ($cached !== null) {
+            return $cached;
+        }
 
+        try {
             $client = OpenAI::client($apiKey);
 
             $createResponse = $client->chat()->create(parameters: [
@@ -47,11 +56,15 @@ final readonly class OpenAICommitGenerator implements CommitGeneratorService
                     ['role' => 'system', 'content' => self::SYSTEM_PROMPT],
                     ['role' => 'user', 'content' => $gitDiff],
                 ],
-                'temperature' => 0.7,
-                'max_tokens' => 500,
+                'temperature' => 0.4,
+                'max_tokens' => 200,
             ]);
 
-            return trim($createResponse->choices[0]->message->content);
+            $message = trim($createResponse->choices[0]->message->content);
+
+            // Cache the response
+            return $this->commitResponseCache->put(gitDiff: $gitDiff, message: $message);
+
         } catch (Exception $e) {
             if (str_contains($e->getMessage(), 'Incorrect API key provided')) {
                 throw new InvalidApiKeyException;

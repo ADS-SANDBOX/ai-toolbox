@@ -18,14 +18,18 @@ final readonly class GenerateCommitAction
     public function __invoke(GenerateCommitRequest $generateCommitRequest): JsonResponse
     {
         try {
-            $commitMessage = $this->generateCommitUseCase->execute(
+            $result = $this->generateCommitUseCase->execute(
                 generateCommitDTO: new GenerateCommitDTO(
                     gitDiff: $generateCommitRequest->get(key: 'git_diff'),
                     userId: $generateCommitRequest->user()->id
                 )
             );
 
-            return (new CommitGeneratedResponse(commitMessage: $commitMessage))->toResponse();
+            return (new CommitGeneratedResponse(
+                commitMessage: $result['message'],
+                cached: $result['cached'],
+                expiresAt: $result['expires_at']
+            ))->toResponse();
 
         } catch (Exception $e) {
             return response()->json(

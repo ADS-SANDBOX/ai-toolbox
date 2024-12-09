@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Bundle\GitAssistant\Domain\Exception\OpenAI;
+
 use Exception;
+
 final class InvalidApiKeyException extends Exception
 {
     public function __construct()

@@ -44,6 +44,7 @@ services:
             app-network:
         environment:
             <<: *environment
+
     database:
         image: mariadb:10.6
         container_name: "${COMPOSE_PROJECT_NAME}-db"
@@ -60,5 +61,19 @@ services:
             - ./project/db:/var/lib/mysql
         networks:
             app-network:
+
+    redis:
+        image: redis:7.2-alpine
+        container_name: "${COMPOSE_PROJECT_NAME}-redis"
+        restart: unless-stopped
+        ports:
+            - "6${PORT_VAR}79:6379"
+        volumes:
+            - ./project/redis:/data
+        command: redis-server --appendonly yes
+        networks:
+            app-network:
+        environment:
+            <<: *environment
 volumes:
     app-data:
