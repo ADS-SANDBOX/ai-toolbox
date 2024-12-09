@@ -89,3 +89,15 @@ autoload:
 	$(call run_in_code,php artisan cache:clear)
 	$(call run_in_code,php artisan view:clear)
 	$(call run_in_code,php artisan config:clear)
+
+test:
+	$(call run_in_code,php artisan test)
+
+feature-test:
+	$(call run_in_code,php artisan test --testsuite=Feature)
+
+unit-test:
+	$(call run_in_code,php artisan test --testsuite=Unit)
+
+integration-test:
+	$(call run_in_code,php artisan test --testsuite=Integration)
