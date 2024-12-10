@@ -18,7 +18,7 @@ final readonly class UpdateApiKeyAction
     public function __invoke(UpdateApiKeyRequest $updateApiKeyRequest): JsonResponse
     {
         try {
-            $this->updateApiKeyUseCase->execute(
+            ($this->updateApiKeyUseCase)(
                 updateApiKeyDTO: new UpdateApiKeyDTO(
                     userId: $updateApiKeyRequest->user()->id,
                     apiKey: $updateApiKeyRequest->get(key: 'api_key')

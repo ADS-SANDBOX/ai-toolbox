@@ -18,9 +18,11 @@ final readonly class GeneratePullRequestUseCase
     ) {}
 
     /**
-     * @throws EmptyGitDiffException|UserOpenaiApiKeyMissingException|UserNotFoundException
+     * @throws UserNotFoundException
+     * @throws UserOpenaiApiKeyMissingException
+     * @throws EmptyGitDiffException
      */
-    public function execute(GeneratePullRequestDTO $generatePullRequestDTO): array
+    public function __invoke(GeneratePullRequestDTO $generatePullRequestDTO): array
     {
         $user = $this->userRepository->findById(id: $generatePullRequestDTO->userId());
 

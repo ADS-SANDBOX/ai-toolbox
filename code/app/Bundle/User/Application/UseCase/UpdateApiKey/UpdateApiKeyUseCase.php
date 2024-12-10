@@ -13,7 +13,10 @@ final readonly class UpdateApiKeyUseCase
         private UserRepository $userRepository
     ) {}
 
-    public function execute(UpdateApiKeyDTO $updateApiKeyDTO): void
+    /**
+     * @throws UserNotFoundException
+     */
+    public function __invoke(UpdateApiKeyDTO $updateApiKeyDTO): void
     {
         $user = $this->userRepository->findById(
             id: $updateApiKeyDTO->userId()

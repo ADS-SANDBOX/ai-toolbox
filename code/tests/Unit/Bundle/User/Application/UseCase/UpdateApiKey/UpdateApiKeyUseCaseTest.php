@@ -13,6 +13,7 @@ use App\Bundle\User\Domain\ValueObject\HashedApiKey;
 use App\Bundle\User\Domain\ValueObject\HashedPassword;
 use Illuminate\Foundation\Testing\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
 use Tests\CreatesApplication;
 
 final class UpdateApiKeyUseCaseTest extends TestCase
@@ -23,6 +24,9 @@ final class UpdateApiKeyUseCaseTest extends TestCase
 
     private UpdateApiKeyUseCase $updateApiKeyUseCase;
 
+    /**
+     * @throws UserNotFoundException
+     */
     #[Test]
     public function it_should_update_user_api_key_successfully(): void
     {
@@ -62,7 +66,7 @@ final class UpdateApiKeyUseCaseTest extends TestCase
             }));
 
         // Act
-        $this->updateApiKeyUseCase->execute(
+        ($this->updateApiKeyUseCase)(
             new UpdateApiKeyDTO(
                 userId: $userId,
                 apiKey: $apiKey
@@ -86,7 +90,7 @@ final class UpdateApiKeyUseCaseTest extends TestCase
         $this->expectException(UserNotFoundException::class);
 
         // Act
-        $this->updateApiKeyUseCase->execute(
+        ($this->updateApiKeyUseCase)(
             new UpdateApiKeyDTO(
                 userId: $userId,
                 apiKey: 'any-api-key'
@@ -94,6 +98,9 @@ final class UpdateApiKeyUseCaseTest extends TestCase
         );
     }
 
+    /**
+     * @throws UserNotFoundException
+     */
     #[Test]
     public function it_should_update_api_key_when_user_already_has_one(): void
     {
@@ -129,7 +136,7 @@ final class UpdateApiKeyUseCaseTest extends TestCase
             }));
 
         // Act
-        $this->updateApiKeyUseCase->execute(
+        ($this->updateApiKeyUseCase)(
             new UpdateApiKeyDTO(
                 userId: $userId,
                 apiKey: $newApiKey
@@ -137,6 +144,9 @@ final class UpdateApiKeyUseCaseTest extends TestCase
         );
     }
 
+    /**
+     * @throws UserNotFoundException
+     */
     #[Test]
     public function it_should_throw_exception_when_empty_api_key(): void
     {
@@ -162,7 +172,7 @@ final class UpdateApiKeyUseCaseTest extends TestCase
         $this->expectExceptionMessage('API key cannot be empty');
 
         // Act
-        $this->updateApiKeyUseCase->execute(
+        ($this->updateApiKeyUseCase)(
             new UpdateApiKeyDTO(
                 userId: $userId,
                 apiKey: $emptyApiKey
@@ -170,6 +180,9 @@ final class UpdateApiKeyUseCaseTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();

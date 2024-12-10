@@ -8,6 +8,7 @@ use App\Bundle\GitAssistant\Domain\Exception\EmptyGitDiffException;
 use App\Bundle\GitAssistant\Domain\Service\CommitGeneratorService;
 use App\Bundle\GitAssistant\Domain\ValueObject\GitDiff;
 use App\Bundle\User\Domain\Entity\User;
+use App\Bundle\User\Domain\Exception\UserNotFoundException;
 use App\Bundle\User\Domain\Exception\UserOpenaiApiKeyMissingException;
 use App\Bundle\User\Domain\Repository\UserRepository;
 use App\Bundle\User\Domain\ValueObject\Email;
@@ -27,6 +28,11 @@ final class GenerateCommitUseCaseTest extends TestCase
 
     private GenerateCommitUseCase $generateCommitUseCase;
 
+    /**
+     * @throws UserNotFoundException
+     * @throws UserOpenaiApiKeyMissingException
+     * @throws EmptyGitDiffException
+     */
     #[Test]
     public function it_should_generate_commit_message_successfully(): void
     {
@@ -62,7 +68,7 @@ final class GenerateCommitUseCaseTest extends TestCase
             ->willReturn($expectedResponse);
 
         // Act
-        $result = $this->generateCommitUseCase->execute(
+        $result = ($this->generateCommitUseCase)(
             new GenerateCommitDTO(
                 gitDiff: new GitDiff($gitDiff),
                 userId: $userId
@@ -73,6 +79,10 @@ final class GenerateCommitUseCaseTest extends TestCase
         $this->assertEquals($expectedResponse, $result);
     }
 
+    /**
+     * @throws UserNotFoundException
+     * @throws UserOpenaiApiKeyMissingException
+     */
     #[Test]
     public function it_should_throw_exception_when_git_diff_is_empty(): void
     {
@@ -98,7 +108,7 @@ final class GenerateCommitUseCaseTest extends TestCase
         $this->expectException(EmptyGitDiffException::class);
 
         // Act
-        $this->generateCommitUseCase->execute(
+        ($this->generateCommitUseCase)(
             new GenerateCommitDTO(
                 gitDiff: new GitDiff($emptyGitDiff),
                 userId: $userId
@@ -106,6 +116,10 @@ final class GenerateCommitUseCaseTest extends TestCase
         );
     }
 
+    /**
+     * @throws UserNotFoundException
+     * @throws EmptyGitDiffException
+     */
     #[Test]
     public function it_should_throw_exception_when_user_api_key_is_missing(): void
     {
@@ -131,7 +145,7 @@ final class GenerateCommitUseCaseTest extends TestCase
         $this->expectException(UserOpenaiApiKeyMissingException::class);
 
         // Act
-        $this->generateCommitUseCase->execute(
+        ($this->generateCommitUseCase)(
             new GenerateCommitDTO(
                 gitDiff: new GitDiff($gitDiff),
                 userId: $userId
@@ -139,6 +153,11 @@ final class GenerateCommitUseCaseTest extends TestCase
         );
     }
 
+    /**
+     * @throws UserNotFoundException
+     * @throws UserOpenaiApiKeyMissingException
+     * @throws EmptyGitDiffException
+     */
     #[Test]
     public function it_should_handle_special_characters_in_git_diff(): void
     {
@@ -174,7 +193,7 @@ final class GenerateCommitUseCaseTest extends TestCase
             ->willReturn($expectedResponse);
 
         // Act
-        $result = $this->generateCommitUseCase->execute(
+        $result = ($this->generateCommitUseCase)(
             new GenerateCommitDTO(
                 gitDiff: new GitDiff($gitDiff),
                 userId: $userId
@@ -185,6 +204,11 @@ final class GenerateCommitUseCaseTest extends TestCase
         $this->assertEquals($expectedResponse, $result);
     }
 
+    /**
+     * @throws UserNotFoundException
+     * @throws UserOpenaiApiKeyMissingException
+     * @throws EmptyGitDiffException
+     */
     #[Test]
     public function it_should_handle_large_git_diffs(): void
     {
@@ -220,7 +244,7 @@ final class GenerateCommitUseCaseTest extends TestCase
             ->willReturn($expectedResponse);
 
         // Act
-        $result = $this->generateCommitUseCase->execute(
+        $result = ($this->generateCommitUseCase)(
             new GenerateCommitDTO(
                 gitDiff: new GitDiff($largeDiff),
                 userId: $userId

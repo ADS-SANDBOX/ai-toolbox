@@ -18,9 +18,11 @@ final readonly class GenerateCommitUseCase
     ) {}
 
     /**
-     * @throws EmptyGitDiffException|UserOpenaiApiKeyMissingException|UserNotFoundException
+     * @throws UserNotFoundException
+     * @throws UserOpenaiApiKeyMissingException
+     * @throws EmptyGitDiffException
      */
-    public function execute(GenerateCommitDTO $generateCommitDTO): array
+    public function __invoke(GenerateCommitDTO $generateCommitDTO): array
     {
         $user = $this->userRepository->findById(id: $generateCommitDTO->userId());
 

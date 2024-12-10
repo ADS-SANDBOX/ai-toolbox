@@ -19,7 +19,7 @@ final readonly class GenerateCommitAction
     public function __invoke(GenerateCommitRequest $generateCommitRequest): JsonResponse
     {
         try {
-            $result = $this->generateCommitUseCase->execute(
+            $result = ($this->generateCommitUseCase)(
                 generateCommitDTO: new GenerateCommitDTO(
                     gitDiff: new GitDiff(value: $generateCommitRequest->get(key: 'git_diff')),
                     userId: $generateCommitRequest->user()->id

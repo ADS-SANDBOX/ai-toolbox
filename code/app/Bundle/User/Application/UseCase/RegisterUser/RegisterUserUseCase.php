@@ -3,6 +3,8 @@
 namespace App\Bundle\User\Application\UseCase\RegisterUser;
 
 use App\Bundle\User\Domain\Entity\User;
+use App\Bundle\User\Domain\Exception\InvalidEmailException;
+use App\Bundle\User\Domain\Exception\InvalidPasswordException;
 use App\Bundle\User\Domain\Exception\UserAlreadyExistsException;
 use App\Bundle\User\Domain\Repository\UserRepository;
 use App\Bundle\User\Domain\ValueObject\Email;
@@ -16,7 +18,12 @@ final readonly class RegisterUserUseCase
         private UserRepository $userRepository
     ) {}
 
-    public function execute(RegisterUserDTO $registerUserDTO): string
+    /**
+     * @throws UserAlreadyExistsException
+     * @throws InvalidEmailException
+     * @throws InvalidPasswordException
+     */
+    public function __invoke(RegisterUserDTO $registerUserDTO): string
     {
         $email = new Email(email: $registerUserDTO->email());
 

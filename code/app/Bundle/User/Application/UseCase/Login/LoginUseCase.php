@@ -4,6 +4,7 @@ namespace App\Bundle\User\Application\UseCase\Login;
 
 use App\Bundle\User\Domain\Entity\User;
 use App\Bundle\User\Domain\Exception\InvalidCredentialsException;
+use App\Bundle\User\Domain\Exception\InvalidEmailException;
 use App\Bundle\User\Domain\Repository\UserRepository;
 use App\Bundle\User\Domain\ValueObject\Email;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -14,7 +15,11 @@ final readonly class LoginUseCase
         private UserRepository $userRepository
     ) {}
 
-    public function execute(LoginDTO $loginDTO): string
+    /**
+     * @throws InvalidEmailException
+     * @throws InvalidCredentialsException
+     */
+    public function __invoke(LoginDTO $loginDTO): string
     {
         $email = new Email(email: $loginDTO->email());
 

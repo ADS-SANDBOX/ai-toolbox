@@ -4,6 +4,8 @@ namespace App\Bundle\User\Infrastructure\Action;
 
 use App\Bundle\User\Application\UseCase\RegisterUser\RegisterUserDTO;
 use App\Bundle\User\Application\UseCase\RegisterUser\RegisterUserUseCase;
+use App\Bundle\User\Domain\Exception\InvalidEmailException;
+use App\Bundle\User\Domain\Exception\InvalidPasswordException;
 use App\Bundle\User\Domain\Exception\UserAlreadyExistsException;
 use App\Bundle\User\Infrastructure\Http\Request\RegisterUserRequest;
 use App\Bundle\User\Infrastructure\Http\Response\UserRegisteredResponse;
@@ -18,7 +20,7 @@ final readonly class RegisterUserAction
     public function __invoke(RegisterUserRequest $registerUserRequest): JsonResponse
     {
         try {
-            $token = $this->registerUserUseCase->execute(
+            $token = ($this->registerUserUseCase)(
                 registerUserDTO: new RegisterUserDTO(
                     name: $registerUserRequest->get(key: 'name'),
                     email: $registerUserRequest->get(key: 'email'),
@@ -32,6 +34,10 @@ final readonly class RegisterUserAction
             return response()->json(data: [
                 'error' => $e->getMessage(),
             ], status: JsonResponse::HTTP_CONFLICT);
+        } catch (InvalidEmailException|InvalidPasswordException $e) {
+            return response()->json(data: [
+                'error' => $e->getMessage(),
+            ], status: JsonResponse::HTTP_BAD_REQUEST);
         }
     }
 }

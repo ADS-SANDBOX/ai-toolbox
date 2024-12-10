@@ -19,7 +19,7 @@ final readonly class GeneratePullRequestAction
     public function __invoke(GeneratePullRequestRequest $generatePullRequestRequest): JsonResponse
     {
         try {
-            $result = $this->generatePullRequestUseCase->execute(
+            $result = ($this->generatePullRequestUseCase)(
                 generatePullRequestDTO: new GeneratePullRequestDTO(
                     gitDiff: new GitDiff(value: $generatePullRequestRequest->get(key: 'git_diff')),
                     userId: $generatePullRequestRequest->user()->id
