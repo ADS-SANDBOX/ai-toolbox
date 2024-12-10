@@ -1,6 +1,6 @@
 ## Don't have time?
 If you don't have time to test the project you can see a demo here
-https://bit.ly/git-assistant
+https://bit.ly/git-assistant-youtube
 
 Otherwise, you can follow the README to make it work on your host.
 
