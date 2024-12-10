@@ -13,22 +13,28 @@ export
 DC := docker-compose -f $(DOCKER_COMPOSE_FILE)
 EXEC := $(DC) exec php sh -c
 
-build:
+docker-env:
 	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_EXAMPLE)" ]; then \
 		echo "Copying $(ENV_EXAMPLE) to $(ENV_FILE)..."; \
 		cp "$(ENV_EXAMPLE)" "$(ENV_FILE)"; \
 	fi
-	envsubst '$$COMPOSE_PROJECT_NAME' < $(NGINX_TEMPLATE) > $(NGINX_CONF)
+
+envsubst-nginx:
+	source $(ENV_FILE) && envsubst '$$COMPOSE_PROJECT_NAME' < $(NGINX_TEMPLATE) > $(NGINX_CONF)
+
+build:
+	$(MAKE) docker-env
+	$(MAKE) envsubst-nginx
 	$(DC) build
 
 build-no-cache:
+	$(MAKE) docker-env
+	$(MAKE) envsubst-nginx
 	$(DC) build --no-cache
 
 up:
-	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_EXAMPLE)" ]; then \
-		echo "Copying $(ENV_EXAMPLE) to $(ENV_FILE)..."; \
-		cp "$(ENV_EXAMPLE)" "$(ENV_FILE)"; \
-	fi
+	$(MAKE) docker-env
+	$(MAKE) envsubst-nginx
 	$(DC) up -d
 
 down:
